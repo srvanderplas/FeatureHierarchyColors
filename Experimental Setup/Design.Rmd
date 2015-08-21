@@ -38,26 +38,26 @@ library(magrittr)
 library(stringr)
 library(DT)
 aes <- c("Plain", "Color", "Shape", "Ellipse", "Color + Shape", "Color + Ellipse", "Color + Shape + Ellipse", "Line", "Bands", "Line + Bands", "Color + Line", "Color + Ellipse + Line + Bands")
-aes <- factor(aes, levels=aes)
+aes <- factor(aes, levels = aes)
 
 plots <- c("Trend", "Mixture", "Cluster")
-plots <- factor(plots, levels=plots)
+plots <- factor(plots, levels = plots)
 
 tab <- expand.grid(Aesthetic = aes, Plot = plots)
 tab$Spatial.Cues <- tab$Plot %>% 
-  str_replace_all(c("Mix"="", "Cluster"="Proximity", "Trend"="Continuity")) 
+  str_replace_all(c("Mix" = "", "Cluster" = "Proximity", "Trend" = "Continuity")) 
 tab$Aes.Cues <- tab$Aesthetic %>%
-  str_replace_all(c("Plain" = "", "Color"="Similarity", "Shape"="Similarity", "Ellipse"="Region", "Line"="Continuity", "Bands" = "Region"))
+  str_replace_all(c("Plain"  =  "", "Color" = "Similarity", "Shape" = "Similarity", "Ellipse" = "Region", "Line" = "Continuity", "Bands" = "Region"))
 
 tab <- tab %>% 
   # Create list column, then make each entry its own row
-  mutate(Aes.Cues = str_split(tab$Aes.Cues, pattern=" \\+ ")) %>% 
+  mutate(Aes.Cues = str_split(tab$Aes.Cues, pattern = " \\+ ")) %>% 
   unnest(Aes.Cues) %>%
   # Create Cue.Type and put all cues in the same column
   gather(key = "Cue.Type", value = "Gestalt", Spatial.Cues, Aes.Cues) %>%
   arrange(Aesthetic, Cue.Type) %>%
   # Get rid of empty cues
-  subset(Gestalt!="") %>%
+  subset(Gestalt != "") %>%
   # Spread things back out so Gestalt Cues are their own rows
   group_by(Aesthetic, Plot, Gestalt) %>% 
   mutate(n = length(unique(Cue.Type))) %>% 
@@ -70,8 +70,8 @@ tab <- tab %>%
 tab$OE <- !tab$Aesthetic %in% c("Bands", "Ellipse") %>% as.numeric()
 
 tab %>%
-  datatable(rownames=FALSE, options=list(lengthMenu=c(18, 36, 72, 108))) %>%
-  formatStyle(columns=names(tab), valueColumns='Aesthetic', backgroundColor=styleEqual(unique(tab$Aesthetic), c("white", "lightgrey")[as.numeric(unique(tab$Aesthetic))%%2+1]))
+  datatable(rownames = FALSE, options = list(lengthMenu = c(18, 36, 72, 108))) %>%
+  formatStyle(columns = names(tab), valueColumns = 'Aesthetic', backgroundColor = styleEqual(unique(tab$Aesthetic), c("white", "lightgrey")[as.numeric(unique(tab$Aesthetic))%%2+1]))
 ```
 
 ### Aesthetic Parameters
@@ -94,7 +94,7 @@ Previously, 15*(# clusters)
     * Trend model: $\sigma_T$
 * Mixing Parameters:
     * Mixing proportion for null plots    
-    Can be constant ($\lambda=.5$) or vary (i.e. $\lambda\in[.3, .7]$)
+    Can be constant ($\lambda = .5$) or vary (i.e. $\lambda\in[.3, .7]$)
     * Required $R^2$ for cluster plots     
     Previously, we required $R^2 \in [.25, .75]$ for cluster plots
     * Required cluster size equality    
@@ -105,30 +105,30 @@ source("../Code/MixtureLineupsTurk18.R")
 library(ggplot2)
 
 min.group.size <- function(N, K){
-  N/(2*K+1)
+  N/(2*K + 1)
 }
 
 allocate.groups <- function(N, K){
   group.size <- min.group.size(N,K)
-  tmp <- sample(1:K, size=N, replace=T)
+  tmp <- sample(1:K, size = N, replace = T)
   x <- 0
-  while(min(table(tmp))<=group.size & x<100){
-    tmp <- sample(1:K, size=N, replace=T)
-    x <- x+1
+  while (min(table(tmp)) <= group.size & x < 100) {
+    tmp <- sample(1:K, size = N, replace = T)
+    x <- x + 1
   }
-  if(x==100){
+  if (x == 100) {
     warning("Groups not allocated within parameters")
     return(rep(NA, N))
   }
   tmp
 }
 
-sizelimit <- expand.grid(PPC=c(10, 15, 20), K=3:8)
+sizelimit <- expand.grid(PPC = c(10, 15, 20), K = 3:8)
 sizelimit$N <- with(sizelimit, PPC*K)
 sizelimit %<>% 
   mutate(
-    group.size=ceiling(min.group.size(N,K)), 
-    max.group.size=N-group.size*(K-1)
+    group.size = ceiling(min.group.size(N,K)), 
+    max.group.size = N - group.size*(K - 1)
   )
 
 res <- sizelimit %>% 
@@ -141,8 +141,10 @@ res <- sizelimit %>%
     )
   )
 
-ggplot(data=res, aes(x=factor(PPC), group=interaction(PPC, K), y=gini, fill=factor(K))) + 
-  geom_violin(position="dodge", width=.8) + 
+ggplot(data = res, 
+       aes(x = factor(PPC), group = interaction(PPC, K), 
+           y = gini, fill = factor(K))) + 
+  geom_violin(position = "dodge", width = .8) + 
   scale_fill_discrete("K") + 
   ylab("Gini Impurity") + 
   xlab("Avg # Points Per Cluster (N/K)") + 
@@ -164,4 +166,32 @@ Extra conditions: (would be nice but not essential)
 * Shape (compare to prev. experiment where shape was stronger than color - is this an artifact of bad color choice?)
 
 ## Experimental Parameters
-Choose via simulation???
+
+### Color Palettes
+```{r color-palettes}
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length=n+1)
+  hcl(h=hues, l=65, c=100)[1:n]
+}
+
+library(dichromat)
+library(RColorBrewer)
+
+palettes <- rbind(
+  data.frame(Type = "dichromat", x = 1:12, y = 1, 
+             colors = colorschemes$Categorical.12),
+  data.frame(Type = "tableau", x = 1:10, y = 2, 
+             colors = c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+             "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf")),
+  data.frame(Type = "ggplot2", x = 1:12, y = 3, colors = gg_color_hue(12)),
+  data.frame(Type = "colorbrewer", x = 1:12, y = 4, 
+             colors = brewer.pal(n = 12, name = "Paired"))
+)
+
+ggplot() + 
+  geom_text(aes(x = rep(-1, 4), y = 1:4, label = unique(palettes$Type)), aes.inherit = F) + 
+  geom_point(aes(x = x, y = y, color = colors), size=5, data = palettes) + 
+  scale_color_identity() + 
+  xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank())
