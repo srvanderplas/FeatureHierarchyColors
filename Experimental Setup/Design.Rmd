@@ -1,0 +1,167 @@
+---
+title: "Color Hierarchy Experimental Design"
+author: "Susan VanderPlas"
+date: "August 21, 2015"
+output:
+  knitrBootstrap::bootstrap_document:
+    title: "Cool Packages"
+    theme: cerulean
+    toc: true
+    highlight: sunburst
+    theme.chooser: FALSE
+    highlight.chooser: FALSE
+---
+
+**Goal** - Examine whether different color palettes are more effective for emphasizing similarity (as a gestalt characteristic).
+
+**Hypothesis** - Color palettes which have more contrast (in hue and saturation) will provide more effective cues for distinguishing clusters (and thus, will provide more cohesive cues that a group of points of the same color are different from other groups of points shown)
+
+# General Feature Hierarchy Experiment Design
+
+## Gestalt Interpretation of Aesthetics
+In the first feature hierarchy experiment, we utilized 10 aesthetic combinations, with lineups consisting of:
+* 18 lineups generated from a mixture model
+* 1 lineup generated from a cluster model
+* 1 lineup generated from a trend model
+
+This lineup framework allowed us to show the same lineup data with 10 different aesthetic combinations, comparing the results within the same dataset. 
+
+A gestalt analysis of the aesthetic combinations must account for the different component plots in the lineups, which provide ambiguous heuristic cues (by design). 
+Mixture model plots are ambiguous, providing weak continuity cues and weak proximity cues. Cluster model plots provide proximity cues; target model plots provide continuity cues by virtue of the spatial arrangement of the data. 
+
+The following table shows the cues provided by the aesthetic layers when combined with the data. "Region" here is shorthand for common region. OE indicates that the condition was included in the original experiment. 
+
+```{r table-of-gestaltness, echo=F, message=F, warning=F}
+library(tidyr)
+library(dplyr)
+library(magrittr)
+library(stringr)
+library(DT)
+aes <- c("Plain", "Color", "Shape", "Ellipse", "Color + Shape", "Color + Ellipse", "Color + Shape + Ellipse", "Line", "Bands", "Line + Bands", "Color + Line", "Color + Ellipse + Line + Bands")
+aes <- factor(aes, levels=aes)
+
+plots <- c("Trend", "Mixture", "Cluster")
+plots <- factor(plots, levels=plots)
+
+tab <- expand.grid(Aesthetic = aes, Plot = plots)
+tab$Spatial.Cues <- tab$Plot %>% 
+  str_replace_all(c("Mix"="", "Cluster"="Proximity", "Trend"="Continuity")) 
+tab$Aes.Cues <- tab$Aesthetic %>%
+  str_replace_all(c("Plain" = "", "Color"="Similarity", "Shape"="Similarity", "Ellipse"="Region", "Line"="Continuity", "Bands" = "Region"))
+
+tab <- tab %>% 
+  # Create list column, then make each entry its own row
+  mutate(Aes.Cues = str_split(tab$Aes.Cues, pattern=" \\+ ")) %>% 
+  unnest(Aes.Cues) %>%
+  # Create Cue.Type and put all cues in the same column
+  gather(key = "Cue.Type", value = "Gestalt", Spatial.Cues, Aes.Cues) %>%
+  arrange(Aesthetic, Cue.Type) %>%
+  # Get rid of empty cues
+  subset(Gestalt!="") %>%
+  # Spread things back out so Gestalt Cues are their own rows
+  group_by(Aesthetic, Plot, Gestalt) %>% 
+  mutate(n = length(unique(Cue.Type))) %>% 
+  select(-Cue.Type) %>% unique() %>%
+  group_by(Aesthetic, Plot) %>%
+  spread(key = Gestalt, value = n, fill = 0, drop = FALSE) %>%
+  # Arrange cols
+  select(Aesthetic, Plot, Continuity, Region, Similarity, Proximity) 
+
+tab$OE <- !tab$Aesthetic %in% c("Bands", "Ellipse") %>% as.numeric()
+
+tab %>%
+  datatable(rownames=FALSE, options=list(lengthMenu=c(18, 36, 72, 108))) %>%
+  formatStyle(columns=names(tab), valueColumns='Aesthetic', backgroundColor=styleEqual(unique(tab$Aesthetic), c("white", "lightgrey")[as.numeric(unique(tab$Aesthetic))%%2+1]))
+```
+
+### Aesthetic Parameters
+Design choices for aesthetic parameters may also be important: 
+* Shape palettes (and default shape, for plots without a shape aesthetic mapping - we use open circles to reduce the effect of overplotting)
+* Color palettes (default color is usually black)
+* Region aesthetics    
+Bands and ellipses can be plotted using unfilled outlines or filled regions; these may recruit gestalt organizational principals differently (effect strength and organizing principles recruited).    
+Note: above we've discussed region aesthetics in terms of ellipses and confidence bands, however, these are not the only options; other types of intervals could be utilized (for bands) and it would also be reasonable to use convex hulls instead of aesthetics.
+
+
+## Experimental Parameters
+In addition to the plot aesthetics, there are several experimental parameters which need to be set: 
+* Choices of # clusters:    
+Previously, 3 and 5
+* Choices of # points: 
+Previously, 15*(# clusters)
+* Model Parameters:
+    * Cluster model: $\sigma_C$
+    * Trend model: $\sigma_T$
+* Mixing Parameters:
+    * Mixing proportion for null plots    
+    Can be constant ($\lambda=.5$) or vary (i.e. $\lambda\in[.3, .7]$)
+    * Required $R^2$ for cluster plots     
+    Previously, we required $R^2 \in [.25, .75]$ for cluster plots
+    * Required cluster size equality    
+    Currently set so that $N_i = \{\# \text{ points in cluster i}\} >= max\{4, N/(2K+1)\}$
+    
+```{r cluster-size-limit-gini, echo=F, include=T, fig.width=8, fig.height=4}
+source("../Code/MixtureLineupsTurk18.R")
+library(ggplot2)
+
+min.group.size <- function(N, K){
+  N/(2*K+1)
+}
+
+allocate.groups <- function(N, K){
+  group.size <- min.group.size(N,K)
+  tmp <- sample(1:K, size=N, replace=T)
+  x <- 0
+  while(min(table(tmp))<=group.size & x<100){
+    tmp <- sample(1:K, size=N, replace=T)
+    x <- x+1
+  }
+  if(x==100){
+    warning("Groups not allocated within parameters")
+    return(rep(NA, N))
+  }
+  tmp
+}
+
+sizelimit <- expand.grid(PPC=c(10, 15, 20), K=3:8)
+sizelimit$N <- with(sizelimit, PPC*K)
+sizelimit %<>% 
+  mutate(
+    group.size=ceiling(min.group.size(N,K)), 
+    max.group.size=N-group.size*(K-1)
+  )
+
+res <- sizelimit %>% 
+  rowwise() %>% 
+  do(
+    data.frame(
+      ., gini = unlist(
+        lapply(1:500, function(i) gini(allocate.groups(.$N, .$K)))
+      )
+    )
+  )
+
+ggplot(data=res, aes(x=factor(PPC), group=interaction(PPC, K), y=gini, fill=factor(K))) + 
+  geom_violin(position="dodge", width=.8) + 
+  scale_fill_discrete("K") + 
+  ylab("Gini Impurity") + 
+  xlab("Avg # Points Per Cluster (N/K)") + 
+  theme_bw() + 
+  ggtitle("Distribution of Gini Impurity Under N/(2K+1) Rule")
+```
+
+# This Experiment
+
+## Aesthetics
+In this experiment, we wish to examine color in greater depth. We will need the following aesthetic conditions: 
+* Plain (control)
+* Color (indep. variable)
+* Line (provides signal for contrasting plot type)
+* Color + Line (provides competing signals)
+
+Extra conditions: (would be nice but not essential) 
+* Ellipse (allows examining common region's interaction with color)
+* Shape (compare to prev. experiment where shape was stronger than color - is this an artifact of bad color choice?)
+
+## Experimental Parameters
+Choose via simulation???

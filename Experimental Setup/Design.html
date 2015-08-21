@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="pandoc" />
+
+        <meta name="author" content="Susan VanderPlas" />
+    
+        <meta name="date" content="2015-08-21" />
+    
+    <title>Color Hierarchy Experimental Design</title>
+
+        <script src="Design_files/jquery-1.11.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="Design_files/bootstrap3-3.2.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="Design_files/bootstrap3-3.2.0/css/themes/cerulean/bootstrap.min.css" rel="stylesheet" />
+    <script src="Design_files/bootstrap3-3.2.0/js/bootstrap.min.js"></script>
+    <link href="Design_files/highlightjs-8.2/highlight/sunburst.css" rel="stylesheet" />
+    <script src="Design_files/highlightjs-8.2/highlight.pack.js"></script>
+    <link href="Design_files/MagnificPopup-0.9.9/magnific-popup.css" rel="stylesheet" />
+    <script src="Design_files/MagnificPopup-0.9.9/magnific-popup.js"></script>
+    <link href="Design_files/knitrBootstrap-0.0.1/css/knitrBootstrap.css" rel="stylesheet" />
+    <script src="Design_files/knitrBootstrap-0.0.1/js/knitrBootstrap.js"></script>
+    <script src="Design_files/htmlwidgets-0.5/htmlwidgets.js"></script>
+    <script src="Design_files/datatables-binding-0.1.30/datatables.js"></script>
+    <script src="Design_files/datatables-1.10.7/jquery.dataTables.min.js"></script>
+    <link href="Design_files/datatables-default-1.10.7/dataTables.extra.css" rel="stylesheet" />
+    <link href="Design_files/datatables-default-1.10.7/jquery.dataTables.min.css" rel="stylesheet" />
+    
+    
+  </head>
+
+  <body data-spy="scroll" data-target="#toc">
+    <div id="wrapper" class="container">
+      <div class="row">
+        <div class="contents col-xs-12 col-md-10">
+
+          
+                    <div class="page-header">
+            <h1 class="title">Color Hierarchy Experimental Design</h1>
+                                                <h4 class="author"><em>Susan VanderPlas</em></h4>
+                                                  <h4 class="date"><em>August 21, 2015</em></h4>
+                      </div>
+                    
+<p><strong>Goal</strong> - Examine whether different color palettes are more effective for emphasizing similarity (as a gestalt characteristic).</p><p><strong>Hypothesis</strong> - Color palettes which have more contrast (in hue and saturation) will provide more effective cues for distinguishing clusters (and thus, will provide more cohesive cues that a group of points of the same color are different from other groups of points shown)</p><div id="general-feature-hierarchy-experiment-design" class="section level1"><h1>General Feature Hierarchy Experiment Design</h1><div id="gestalt-interpretation-of-aesthetics" class="section level2"><h2>Gestalt Interpretation of Aesthetics</h2><p>In the first feature hierarchy experiment, we utilized 10 aesthetic combinations, with lineups consisting of: * 18 lineups generated from a mixture model * 1 lineup generated from a cluster model * 1 lineup generated from a trend model</p><p>This lineup framework allowed us to show the same lineup data with 10 different aesthetic combinations, comparing the results within the same dataset.</p><p>A gestalt analysis of the aesthetic combinations must account for the different component plots in the lineups, which provide ambiguous heuristic cues (by design). Mixture model plots are ambiguous, providing weak continuity cues and weak proximity cues. Cluster model plots provide proximity cues; target model plots provide continuity cues by virtue of the spatial arrangement of the data.</p><p>The following table shows the cues provided by the aesthetic layers when combined with the data. “Region” here is shorthand for common region. OE indicates that the condition was included in the original experiment.</p><div class="row"><div id="htmlwidget-284" style="width:100%;height:auto;" class="datatables"></div>
+<script type="application/json" data-for="htmlwidget-284">{"x":{"filter":"none","data":[["Plain","Plain","Plain","Color","Color","Color","Shape","Shape","Shape","Ellipse","Ellipse","Ellipse","Color + Shape","Color + Shape","Color + Shape","Color + Ellipse","Color + Ellipse","Color + Ellipse","Color + Shape + Ellipse","Color + Shape + Ellipse","Color + Shape + Ellipse","Line","Line","Line","Bands","Bands","Bands","Line + Bands","Line + Bands","Line + Bands","Color + Line","Color + Line","Color + Line","Color + Ellipse + Line + Bands","Color + Ellipse + Line + Bands","Color + Ellipse + Line + Bands"],["Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster","Trend","Mixture","Cluster"],[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,2,1,1,1,0,0,2,1,1,2,1,1,2,1,1],[0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1],[0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],[true,true,true,true,true,true,true,true,true,false,false,false,true,true,true,true,true,true,true,true,true,true,true,true,false,false,false,true,true,true,true,true,true,true,true,true]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Aesthetic</th>\n      <th>Plot</th>\n      <th>Continuity</th>\n      <th>Region</th>\n      <th>Similarity</th>\n      <th>Proximity</th>\n      <th>OE</th>\n    </tr>\n  </thead>\n</table>","options":{"lengthMenu":[18,36,72,108],"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data) {\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 0).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 1).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 2).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 3).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 4).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 5).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\nvar value=data[0]; if (value!==null) $(this.api().cell(row, 6).node()).css({'background-color':value == 'Plain' ? 'lightgrey' : value == 'Color' ? 'white' : value == 'Shape' ? 'lightgrey' : value == 'Ellipse' ? 'white' : value == 'Color + Shape' ? 'lightgrey' : value == 'Color + Ellipse' ? 'white' : value == 'Color + Shape + Ellipse' ? 'lightgrey' : value == 'Line' ? 'white' : value == 'Bands' ? 'lightgrey' : value == 'Line + Bands' ? 'white' : value == 'Color + Line' ? 'lightgrey' : value == 'Color + Ellipse + Line + Bands' ? 'white' : ''});\n}"}},"evals":["options.rowCallback"]}</script></div><div id="aesthetic-parameters" class="section level3"><h3>Aesthetic Parameters</h3><p>Design choices for aesthetic parameters may also be important: * Shape palettes (and default shape, for plots without a shape aesthetic mapping - we use open circles to reduce the effect of overplotting) * Color palettes (default color is usually black) * Region aesthetics<br />Bands and ellipses can be plotted using unfilled outlines or filled regions; these may recruit gestalt organizational principals differently (effect strength and organizing principles recruited).<br />Note: above we’ve discussed region aesthetics in terms of ellipses and confidence bands, however, these are not the only options; other types of intervals could be utilized (for bands) and it would also be reasonable to use convex hulls instead of aesthetics.</p></div></div><div id="experimental-parameters" class="section level2"><h2>Experimental Parameters</h2><p>In addition to the plot aesthetics, there are several experimental parameters which need to be set: * Choices of # clusters:<br />Previously, 3 and 5 * Choices of # points: Previously, 15<em>(# clusters) </em> Model Parameters: * Cluster model: <span class="math">\(\sigma_C\)</span> * Trend model: <span class="math">\(\sigma_T\)</span> * Mixing Parameters: * Mixing proportion for null plots<br /> Can be constant (<span class="math">\(\lambda=.5\)</span>) or vary (i.e. <span class="math">\(\lambda\in[.3, .7]\)</span>) * Required <span class="math">\(R^2\)</span> for cluster plots<br /> Previously, we required <span class="math">\(R^2 \in [.25, .75]\)</span> for cluster plots * Required cluster size equality<br /> Currently set so that <span class="math">\(N_i = \{\# \text{ points in cluster i}\} &gt;= max\{4, N/(2K+1)\}\)</span></p><div class="row"><div class="row"><div class="col-md-offset-3 col-md-6"><a href="#" class="thumbnail"><img src="Design_files/figure-html/cluster-size-limit-gini-1.png" /> </a></div></div></div></div></div><div id="this-experiment" class="section level1"><h1>This Experiment</h1><div id="aesthetics" class="section level2"><h2>Aesthetics</h2><p>In this experiment, we wish to examine color in greater depth. We will need the following aesthetic conditions: * Plain (control) * Color (indep. variable) * Line (provides signal for contrasting plot type) * Color + Line (provides competing signals)</p><p>Extra conditions: (would be nice but not essential) * Ellipse (allows examining common region’s interaction with color) * Shape (compare to prev. experiment where shape was stronger than color - is this an artifact of bad color choice?)</p></div></div>
+
+          <p class="text-muted" id="credit">
+            Styled with <a href="https://github.com/jimhester/knitrBootstrap">knitrBootstrap</a>
+          </p>
+
+        </div>
+
+                <div  class="col-md-2">
+          <div class="hidden-print hidden-xs hidden-sm sidebar affix">
+            <div id="toc" class="sidenav well">
+              <ul><li><a href="#general-feature-hierarchy-experiment-design">General Feature Hierarchy Experiment Design</a><ul><li><a href="#gestalt-interpretation-of-aesthetics">Gestalt Interpretation of Aesthetics</a><ul><li><a href="#aesthetic-parameters">Aesthetic Parameters</a></li></ul></li><li><a href="#experimental-parameters">Experimental Parameters</a></li></ul></li><li><a href="#this-experiment">This Experiment</a><ul><li><a href="#aesthetics">Aesthetics</a></li></ul></li></ul>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+        <!-- dynamically load mathjax for compatibility with self-contained -->
+    <script>
+      (function () {
+          var script = document.createElement("script");
+          script.type = "text/javascript";
+          script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+          document.getElementsByTagName("head")[0].appendChild(script);
+      })();
+    </script>
+      </body>
+</html>

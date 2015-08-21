@@ -11,7 +11,7 @@ library(digest)
 library(Cairo)
 
 # Define colors and shapes
-colors <-  c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
+colors <-  c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
              "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf")
 
 shapes <- c(1,0,3,4,8,5,2,6,-0x25C1, -0x25B7)
@@ -39,76 +39,76 @@ get.aes <- function(r){
 get.stats <- function(r){
   c("Reg. Line", "Error Bands", "Ellipses")[which(as.logical(r[3:5]))]
 }
- 
-# #----- Set Up Data Generation (Actual Plots) ----
-# data.parms.full <- expand.grid(sd.trend=round(c(.15, .25, .35), 2),
-#                                sd.cluster=c(.15, .25, .35),
-#                                K=3, 
-#                                N=45)
-# 
-# data.parms.full$l1 <- 0
-# data.parms.full$l2 <- rep(0:8, times=1)
-# plot.parms <- expand.grid(
-#   color = c(0,1),
-#   shape = c(0,1),
-#   reg = c(0,1),
-#   err = c(0,1),
-#   ell = c(0,1)
-# )[c(
-#   1, # control
-#   2, # color
-#   # 3, # shape
-#   # 4, # color + shape
-#   # 18, # color + ellipse
-#   # 20, # color + shape + ellipse
-#   5, # trend
-#   # 13, # trend + error
-#   6#, # color + trend
-#   # 30 # color + ellipse + trend + error
-# ),]
-# 
-# load("./Data/SimulationResults.Rdata")
-# sim.quantile <- function(x){
-#   df <- subset(simulation.results, sd.trend==x$sd.trend & sd.cluster==x$sd.cluster & K==x$K & N ==x$N)
-#   if(nrow(df)==0){
-#     warning(sprintf("Parameter Set (K=%s, SD_T=%.2f, SD_C=%.2f) not found", x$K, x$sd.trend, x$sd.cluster))
-#     return(data.frame(line=NA, cluster=NA, null.line=NA, null.cluster=NA))
-#   } 
-#   data.frame(
-#     line=sum(x$line>=df$line)/length(df$line),
-#     cluster=sum(x$cluster>=df$cluster)/length(df$cluster),
-#     null.line=sum(x$null.line>=df$null.line)/length(df$null.line),
-#     null.cluster=sum(x$null.cluster>=df$null.cluster)/length(df$null.cluster)
-#     )
-# }
-# 
-# set.seed(518290387)
-# 
-# res <- llply(1:nrow(data.parms.full), function(i){
-#   z <- eval.data.quantiles(i, data.parms.full[i,])
-#   return(z)
-# })
-# 
-# 
-# data <- data.frame()
-# data.parms <- data.frame()
-# data.stats <- data.frame()
-# data.subplot.stats <- data.frame()
-# data.quantiles <- data.frame()
-# data.ntries <- NULL
-# 
-# for(i in 1:length(res)){
-#   data <- rbind.fill(data, res[[i]]$data)
-#   data.parms <- rbind.fill(data.parms, data.frame(set=res[[i]]$data.stats$set, data.parms.full[rep(i, nrow(res[[i]]$data.stats)),]))
-#   data.stats <- rbind.fill(data.stats, res[[i]]$data.stats)
-#   data.subplot.stats <- rbind.fill(data.subplot.stats, res[[i]]$data.subplot.stats)
-#   data.quantiles <- rbind.fill(data.quantiles, res[[i]]$quantile.eval)
-#   data.ntries <- c(data.ntries, res[[i]]$ntries)
-# }
-# 
-# data.stats <- merge(data.stats, data.parms.full)
-# 
-# save(plot.parms, data, data.parms, data.stats, data.subplot.stats, data.quantiles, file="./Data/Lineups.Rdata")
+
+#----- Set Up Data Generation (Actual Plots) ----
+data.parms.full <- expand.grid(sd.trend=round(c(.15, .25, .35), 2),
+                               sd.cluster=c(.15, .25, .35),
+                               K=3,
+                               N=45)
+
+data.parms.full$l1 <- 0
+data.parms.full$l2 <- rep(0:8, times=1)
+plot.parms <- expand.grid(
+  color = c(0,1),
+  shape = c(0,1),
+  reg = c(0,1),
+  err = c(0,1),
+  ell = c(0,1)
+)[c(
+  1, # control
+  2, # color
+  # 3, # shape
+  # 4, # color + shape
+  # 18, # color + ellipse
+  # 20, # color + shape + ellipse
+  5, # trend
+  # 13, # trend + error
+  6#, # color + trend
+  # 30 # color + ellipse + trend + error
+),]
+
+load("./Data/SimulationResults.Rdata")
+sim.quantile <- function(x){
+  df <- subset(simulation.results, sd.trend==x$sd.trend & sd.cluster==x$sd.cluster & K==x$K & N ==x$N)
+  if(nrow(df)==0){
+    warning(sprintf("Parameter Set (K=%s, SD_T=%.2f, SD_C=%.2f) not found", x$K, x$sd.trend, x$sd.cluster))
+    return(data.frame(line=NA, cluster=NA, null.line=NA, null.cluster=NA))
+  }
+  data.frame(
+    line=sum(x$line>=df$line)/length(df$line),
+    cluster=sum(x$cluster>=df$cluster)/length(df$cluster),
+    null.line=sum(x$null.line>=df$null.line)/length(df$null.line),
+    null.cluster=sum(x$null.cluster>=df$null.cluster)/length(df$null.cluster)
+    )
+}
+
+set.seed(518290387)
+
+res <- llply(1:nrow(data.parms.full), function(i){
+  z <- eval.data.quantiles(i, data.parms.full[i,])
+  return(z)
+})
+
+
+data <- data.frame()
+data.parms <- data.frame()
+data.stats <- data.frame()
+data.subplot.stats <- data.frame()
+data.quantiles <- data.frame()
+data.ntries <- NULL
+
+for(i in 1:length(res)){
+  data <- rbind.fill(data, res[[i]]$data)
+  data.parms <- rbind.fill(data.parms, data.frame(set=res[[i]]$data.stats$set, data.parms.full[rep(i, nrow(res[[i]]$data.stats)),]))
+  data.stats <- rbind.fill(data.stats, res[[i]]$data.stats)
+  data.subplot.stats <- rbind.fill(data.subplot.stats, res[[i]]$data.subplot.stats)
+  data.quantiles <- rbind.fill(data.quantiles, res[[i]]$quantile.eval)
+  data.ntries <- c(data.ntries, res[[i]]$ntries)
+}
+
+data.stats <- merge(data.stats, data.parms.full)
+
+save(plot.parms, data, data.parms, data.stats, data.subplot.stats, data.quantiles, file="./Data/Lineups.Rdata")
 
 #----- Set Up Data Generation (Trial Plots) ----
 set.seed(32509803)
@@ -123,18 +123,18 @@ test.data.parms$set <- 1:nrow(test.data.parms)
 
 test.data <- ldply(1:nrow(test.data.parms), function(i){ data.frame(set=i, gen.test.data(test.data.parms[i,]))}, .parallel=T)
 test.data <- merge(test.data, test.data.parms[,c("set", "type")], all.x=T, all.y=T)
-test.data.subplot.stats <- 
-  ddply(test.data, .(set, .sample), 
+test.data.subplot.stats <-
+  ddply(test.data, .(set, .sample),
         function(df){
           reg <- lm(y~x, data=df)
-          data.frame(.sample=unique(df$.sample), 
-                     LineSig = summary(reg)$r.squared, 
-                     ClusterSig = cluster(df), 
-                     target1=unique(df$target1), 
+          data.frame(.sample=unique(df$.sample),
+                     LineSig = summary(reg)$r.squared,
+                     ClusterSig = cluster(df),
+                     target1=unique(df$target1),
                      type=unique(df$type))
         })
-test.stats <- 
-  ddply(test.data.subplot.stats, .(set), summarize, 
+test.stats <-
+  ddply(test.data.subplot.stats, .(set), summarize,
     set=unique(set),
     type = unique(type),
     target1 = unique(target1),
@@ -178,7 +178,7 @@ file.remove(files[del.files])
 load("./Data/TestLineups.Rdata")
 
 test.picture.details <- ldply(unique(test.data$set), function(i){
-  save.pics(df=subset(test.data, set==i), datastats=test.stats[i,], 
+  save.pics(df=subset(test.data, set==i), datastats=test.stats[i,],
             plotparms=data.frame(color=0, shape=0, reg=0, err=0, ell=0), plotname="plain", testplot=T)
 }, .parallel=T)
 
@@ -203,7 +203,7 @@ for(i in 1:nrow(ex.pars)){
   plotobj <- gen.plot(subset(ex.data, set==i), aes=NULL, stats=NULL)
   write.csv(subset(ex.data, set==i), sprintf("./Images/Lineups/Data/example-data-%d.csv", i), row.names=FALSE)
   interactive_lineup(plotobj,
-                     fname=fname, 
-                     script="http://www.hofroe.net/examples/lineup/fhaction.js", 
+                     fname=fname,
+                     script="http://www.hofroe.net/examples/lineup/fhaction.js",
                      toggle="select", width=6, height=1.5, ex=T)
 }
