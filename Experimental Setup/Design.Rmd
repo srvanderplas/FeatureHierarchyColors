@@ -167,11 +167,14 @@ Extra conditions: (would be nice but not essential)
 
 ## Experimental Parameters
 
+* Num. Groups: $K = 3, 5$
+* Num. Points: $N = K*15$
+
 ### Color Palettes
-```{r color-palettes}
+```{r color-palettes, echo = F, message = F, warning = F}
 gg_color_hue <- function(n) {
-  hues = seq(15, 375, length=n+1)
-  hcl(h=hues, l=65, c=100)[1:n]
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
 library(dichromat)
@@ -190,8 +193,140 @@ palettes <- rbind(
 
 ggplot() + 
   geom_text(aes(x = rep(-1, 4), y = 1:4, label = unique(palettes$Type)), aes.inherit = F) + 
-  geom_point(aes(x = x, y = y, color = colors), size=5, data = palettes) + 
+  geom_point(aes(x = x, y = y, color = colors), size = 5, data = palettes) + 
   scale_color_identity() + 
   xlim(c(-2, 12.5)) + 
   theme_bw() + 
   theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank())
+```
+If we use "RGB" distance instead of the perceptual kernel distance matrices, where the RGB values are converted from hexadecimal to values from 0 to 256, and then calculate euclidian distance across that space, we can approximate the "maximal distance" approach. Of course, RGB is not a good map of color perception (necessarily) but it's convenient. 
+```{r sample-color-palettes, echo = F, message = F, warning = F}
+source("../Code/MixtureLineupsTurk18.R") # For best.combo function
+
+rgb.dist <- function(cl){
+  stopifnot(sum(nchar(cl) != 7) == 0)
+  
+  require(stringr)
+  
+  red <- str_sub(cl, 2, 3) %>% as.hexmode() %>% as.numeric() %>% dist()
+  green <- str_sub(cl, 4, 5) %>% as.hexmode() %>% as.numeric() %>% dist()
+  blue <- str_sub(cl, 6, 7) %>% as.hexmode() %>% as.numeric() %>% dist()
+  
+  sqrt(red ^ 2 + green ^ 2 + blue ^ 2) %>% as.matrix
+}
+
+# K = 3
+k3.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:3, K = 3, colors = sort(best.combo(ngroups = 3, toupper(as.character(.$colors)), rgb.dist(toupper(as.character(.$colors))))))
+})
+
+# K = 5
+k5.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:5, K = 5, colors = sort(best.combo(ngroups = 5, toupper(as.character(.$colors)), rgb.dist(toupper(as.character(.$colors))))))
+})
+
+# K = 7
+k7.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:7, K = 7, colors = sort(best.combo(ngroups = 7, toupper(as.character(.$colors)), rgb.dist(toupper(as.character(.$colors))))))
+})
+
+color.groups <- bind_rows(k3.colors, k5.colors, k7.colors)
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = colors), size = 5, data = color.groups) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBG distance colors")
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = dichromat(colors, type = "deutan")), size = 5, data = color.groups) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBG distance colors (Deutan*)")
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = dichromat(colors, type = "protan")), size = 5, data = color.groups) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBG distance colors (Protan*)")
+
+```
+If we modify our distance score to work with intensity as well as RGB values (where intensity is calculated as the mean of the RGB values subtracted from 256), we may be closer to truly divergent colors. 
+```{r sample-color-palettes2, echo = F, message = F, warning = F}
+source("../Code/MixtureLineupsTurk18.R") # For best.combo function
+
+rgbi.dist <- function(cl){
+  stopifnot(sum(nchar(cl) != 7) == 0)
+  
+  require(stringr)
+  
+  red <- str_sub(cl, 2, 3) %>% as.hexmode() %>% as.numeric() %>% dist()
+  green <- str_sub(cl, 4, 5) %>% as.hexmode() %>% as.numeric() %>% dist()
+  blue <- str_sub(cl, 6, 7) %>% as.hexmode() %>% as.numeric() %>% dist()
+  intensity <- (red + green + blue)/3
+  
+  sqrt(red ^ 2 + green ^ 2 + blue ^ 2 + (256 - intensity) ^ 2) %>% as.matrix
+}
+
+
+# K = 3
+k3.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:3, K = 3, colors = sort(best.combo(ngroups = 3, toupper(as.character(.$colors)), rgbi.dist(toupper(as.character(.$colors))))))
+})
+
+# K = 5
+k5.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:5, K = 5, colors = sort(best.combo(ngroups = 5, toupper(as.character(.$colors)), rgbi.dist(toupper(as.character(.$colors))))))
+})
+
+# K = 7
+k7.colors <- palettes %>% group_by(Type) %>% do({
+  data.frame(Type = unique(.$Type), idx = 1:7, K = 7, colors = sort(best.combo(ngroups = 7, toupper(as.character(.$colors)), rgbi.dist(toupper(as.character(.$colors))))))
+})
+
+color.groups2 <- bind_rows(k3.colors, k5.colors, k7.colors)
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = colors), size = 5, data = color.groups2) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBGI distance colors")
+
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = dichromat(colors, type = "deutan")), size = 5, data = color.groups2) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBGI distance colors (Deutan*)")
+
+ggplot() + 
+  geom_point(aes(x = idx, y = Type, color = dichromat(colors, type = "protan")), size = 5, data = color.groups2) + 
+  facet_grid(. ~ K, scales = "free_x", space = "free_x") +
+  geom_text(aes(x = -6, y = Type, label = Type), data = unique(color.groups[,c("Type", "K")]), hjust = 0) + 
+  scale_color_identity() + 
+  # xlim(c(-2, 12.5)) + 
+  theme_bw() + 
+  theme(axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank()) + 
+  ggtitle("Max. RBGI distance colors (Protan*)")
+
+```
