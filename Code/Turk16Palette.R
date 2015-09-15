@@ -37,3 +37,14 @@ shapetm[,9] <- 0
 shapetm[10,] <- 0
 shapetm[,10] <- 0
 
+rgb.dist <- function(cl){
+  stopifnot(sum(nchar(cl) != 7) == 0)
+
+  require(stringr)
+
+  red <- str_sub(cl, 2, 3) %>% as.hexmode() %>% as.numeric() %>% dist()
+  green <- str_sub(cl, 4, 5) %>% as.hexmode() %>% as.numeric() %>% dist()
+  blue <- str_sub(cl, 6, 7) %>% as.hexmode() %>% as.numeric() %>% dist()
+
+  sqrt(red ^ 2 + green ^ 2 + blue ^ 2 + (256 - (red + green + blue)/3) ^ 2) %>% as.matrix
+}

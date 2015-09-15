@@ -358,27 +358,45 @@ cluster <- function(dframe) {
   (SSTotal - SSGroup)/SSTotal
 }
 
-save.pics <- function(df, datastats, plotparms, plotname, testplot=FALSE){
+save.pics <- function(df, datastats, plotparms, plotname, palname = NULL, colorp = "", shapep = "", testplot=FALSE){
   i <- unique(df$set)
   if(testplot){
-    dataname <- sprintf("test-set-%d-k-%d-sdline-%.2f-sdgroup-%.2f", i,
+    dataname <- sprintf("test-set-%d-k-%d-sd.trend-%.2f-sd.group-%.2f", i,
                         datastats$K, datastats$sd.trend, datastats$sd.cluster)
-    realfname <- sprintf("test-set-%d-plot-%s-k-%d-sdline-%.2f-sdgroup-%.2f",
+    realfname <- sprintf("test-set-%d-plot-%s-k-%d-sd.trend-%.2f-sd.group-%.2f",
                          i, plotname,
                          datastats$K, datastats$sd.trend, datastats$sd.cluster)
     fname <- realfname
   } else {
-    dataname <- sprintf("set-%d-k-%d-sdline-%.2f-sdgroup-%.2f", i,
-                        datastats$K, datastats$sd.trend, datastats$sd.cluster)
-    realfname <- sprintf("set-%d-plot-%s-k-%d-sdline-%.2f-sdgroup-%.2f",
-                         i, plotname,
-                         datastats$K, datastats$sd.trend, datastats$sd.cluster)
-    fname <- digest(realfname, serialize=FALSE)
+    if(!is.null(palname)){
+      dataname <- sprintf("set-%d-k-%d-sd.trend-%.2f-sd.group-%.2f-%s", i,
+                          datastats$K, datastats$sd.trend, datastats$sd.cluster, palname)
+      realfname <- sprintf("set-%d-plot-%s-k-%d-sd.trend-%.2f-sd.group-%.2f-%s",
+                           i, plotname,
+                           datastats$K, datastats$sd.trend, datastats$sd.cluster, palname)
+      fname <- digest(realfname, serialize=FALSE)
+    } else {
+      dataname <- sprintf("set-%d-k-%d-sd.trend-%.2f-sd.group-%.2f", i,
+                          datastats$K, datastats$sd.trend, datastats$sd.cluster)
+      realfname <- sprintf("set-%d-plot-%s-k-%d-sd.trend-%.2f-sd.group-%.2f",
+                           i, plotname,
+                           datastats$K, datastats$sd.trend, datastats$sd.cluster)
+      fname <- digest(realfname, serialize=FALSE)
+    }
   }
 
-  plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms))
+  if(is.null(shapep) & is.null(colorp)){
+    plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms))
+  } else if(is.null(colorp)){
+    plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms), shapep = shapep)
+  } else if(is.null(shapep)){
+    plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms), colorp = colorp)
+  } else {
+    plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms), colorp = colorp, shapep = shapep)
+  }
 
-  if(plotname=="plain" | testplot) {
+
+  if(plotname=="color" | testplot) {
     write.csv(df, file = paste0("Images/Lineups/Data/", dataname, ".csv"), row.names=FALSE)
   }
 
@@ -393,10 +411,10 @@ save.pics <- function(df, datastats, plotparms, plotname, testplot=FALSE){
   }
 
 
-  obsPlotLocation <- ifelse(sum(c("lineplot", "groupplot")%in%names(datastats))==2,
-                            sprintf("%d, %d", datastats$lineplot, datastats$groupplot),
+  obsPlotLocation <- ifelse(sum(c("target1", "target2")%in%names(datastats))==2,
+                            sprintf("%d, %d", datastats$target1, datastats$target2),
                             datastats$target1)
-  diff.sign <- ifelse(sum(c("lineplot", "groupplot")%in%names(datastats))==2, 1, -1)
+  diff.sign <- ifelse(sum(c("target1", "target2")%in%names(datastats))==2, 1, -1)
   l3 <- which(plotname==c("plain","color", "shape", "colorShape", "colorEllipse", "colorShapeEllipse", "trend", "trendError", "colorTrend", "colorEllipseTrendError"))-1
   difficulty <- as.numeric(sprintf('%d%d%d', datastats$l1, datastats$l2, l3))
 
@@ -411,12 +429,13 @@ save.pics <- function(df, datastats, plotparms, plotname, testplot=FALSE){
     sample_size = datastats$K,
     test_param = sprintf("turk16-%s", plotname),
     param_value = sprintf("k-%d-sdline-%.2f-sdgroup-%.2f", datastats$K, datastats$sd.trend, datastats$sd.cluster),
-    p_value = pValue,
+    # p_value = pValue,
     obs_plot_location = obsPlotLocation,
     pic_name = picName,
-    experiment = "turk16",
-    difficulty = diff.sign*difficulty,
-    data_name = dataname
+    experiment = "turk18",
+    # difficulty = diff.sign*difficulty,
+    data_name = dataname,
+    palname = ifelse(is.null(palname), "", as.character(palname))
   )
 }
 
@@ -444,4 +463,14 @@ interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6,
   grid.script(filename=script)
   grid.export(name=paste0(path, ifelse(trial, "trials/", "svgs/"), fname, ".svg"), uniqueNames=FALSE, exportJS="inline", exportCoords="inline", exportMappings="inline")
   dev.off()
+}
+
+# function to create a list of chosen aesthetics
+get.aes <- function(r){
+  c("Color", "Shape")[which(as.logical(r[1:2]))]
+}
+
+# function to create a list of chosen statistics
+get.stats <- function(r){
+  c("Reg. Line", "Error Bands", "Ellipses")[which(as.logical(r[3:5]))]
 }

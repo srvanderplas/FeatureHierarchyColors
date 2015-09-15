@@ -55,16 +55,16 @@ plot.parms <- expand.grid(
   err = c(0,1),
   ell = c(0,1)
 )[c(
-  1, # control
+  # 1, # control
   2, # color
   # 3, # shape
   # 4, # color + shape
-  # 18, # color + ellipse
+  18, # color + ellipse
   # 20, # color + shape + ellipse
-  5, # trend
+  # 5, # trend
   # 13, # trend + error
-  6#, # color + trend
-  # 30 # color + ellipse + trend + error
+  6, # color + trend
+  30 # color + ellipse + trend + error
 ),]
 
 load("./Data/SimulationResults.Rdata")
