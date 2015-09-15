@@ -20,13 +20,14 @@ extract.data.pars <- function(filename){
   )
 }
 
+set.seed(32509803)
 data <- filelist %>%
   rowwise() %>%
   do({
     pars <- extract.data.pars(.$filename)
     data.frame(pars, read.csv(file = .$filename, stringsAsFactors = FALSE), stringsAsFactors = FALSE)
   }) %>% ungroup() %>%
-  group_by(set) %>%
+  group_by(set, .sample) %>%
   do({
     tmp <- .$group
     df <- pick.clusters(., unique(.$k), nrow(.))

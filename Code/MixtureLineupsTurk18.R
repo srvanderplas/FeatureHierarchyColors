@@ -49,13 +49,10 @@ sim.line <- function(K, N, sd.trend=.3){
 }
 
 pick.clusters <- function(mix.data, K, N){
-
   iter <- 1
   repeat{
     if(iter==1){
       centers <- apply(mix.data[,c("x", "y")], 2, function(x) quantile(x, seq(0, 1, length.out=2*K+1)[(1:K)*2]))
-    } else {
-      centers <- mix.data[sample(1:nrow(mix.data), K, replace=FALSE),c("x", "y")]
     }
 
     clusters <- try(kmeans(mix.data[,c("x", "y")], centers=centers))
@@ -64,8 +61,10 @@ pick.clusters <- function(mix.data, K, N){
       if(sum(clusters$size>(N/(K*2+1)))==K & sum(clusters$size>=4)==K){
         break;
       }
+    } else {
+      centers <- mix.data[sample(1:nrow(mix.data), K, replace=FALSE),c("x", "y")]
     }
-    if(iter>5000){
+    if(iter>50000){
       warning("Max kmeans iterations")
       break;
     }
