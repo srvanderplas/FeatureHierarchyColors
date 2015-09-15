@@ -65,7 +65,7 @@ pick.clusters <- function(mix.data, K, N){
         break;
       }
     }
-    if(iter>100){
+    if(iter>5000){
       warning("Max kmeans iterations")
       break;
     }
