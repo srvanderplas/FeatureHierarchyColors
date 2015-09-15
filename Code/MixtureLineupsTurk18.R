@@ -173,7 +173,7 @@ eval.data <- function(df){
   groups <- subset(df, .sample==target2)
   lines <- subset(df, .sample==target1)
 
-  nl <- ddply(nulls, .(.sample), eval.df)
+  nl <- nulls %>% group_by(.sample) %>% do(eval.df(.))
 
   cl <- eval.df(groups)
   ll <- eval.df(lines)
@@ -217,15 +217,14 @@ eval.data.quantiles <- function(i, data.set.parms, reps=3){
     message(paste0("set = ", set))
     data.sub <- data.frame(set=set, gen.data(as.list(data.set.parms)))
     data.sub.subplot.stats <-
-      ddply(data.sub, .(set, .sample),
-            function(df){
-              reg <- lm(y~x, data=df)
-              data.frame(.sample=unique(df$.sample),
-                         LineSig = summary(reg)$r.squared,
-                         ClusterSig = cluster(df),
-                         lineplot=unique(df$target1),
-                         groupplot=unique(df$target2))
-            })
+      data.sub %>% group_by(set, .sample) %>% do({
+        reg <- lm(y~x, data=.)
+        data.frame(.sample=unique(.$.sample),
+                   LineSig = summary(reg)$r.squared,
+                   ClusterSig = cluster(.),
+                   lineplot=unique(.$target1),
+                   groupplot=unique(.$target2))
+      })
     data.sub.stats <- data.frame(
       data.set.parms[,c("K", "sd.trend", "sd.cluster", "N")],
       summarize(
@@ -282,11 +281,11 @@ gen.plot <- function(dd, aes, stats, colorp=NULL, shapep=NULL){
   }
   if("Error Bands"%in%stats){
     #     xrange <- range(dd$x)
-    tmp <- ddply(dd, .(.sample), function(df){
-      model <- lm(y~x, data=df)
-      range <- diff(range(df$x))
+    tmp <- dd %>% group_by(.sample) %>% do({
+      model <- lm(y~x, data=.)
+      range <- diff(range(.$x))
       newdata <- data.frame(x=seq(min(dd$x)-.1*range, max(dd$x)+.1*range, length.out=400))
-      data.frame(.sample=unique(df$.sample), x=newdata$x,
+      data.frame(.sample=unique(.$.sample), x=newdata$x,
                  predict.lm(model, newdata=newdata, interval="prediction", level=0.9))
     })
     if("Shade Error Bands"%in%stats & "Error Bands"%in%stats){
@@ -351,7 +350,7 @@ cluster <- function(dframe) {
   ymean <- mean(dframe$y)
   dframe$dist <- with(dframe, (x-xmean)^2 + (y-ymean)^2)
   SSTotal <- sum(dframe$dist)
-  dframe <- ddply(dframe, .(group), transform, xgroup=mean(x), ygroup=mean(y))
+  dframe <- dframe %>% group_by(group) %>% mutate(xgroup=mean(x), ygroup=mean(y))
   dframe$gdist <- with(dframe, (x-xgroup)^2 + (y-ygroup)^2)
   SSGroup <- sum(dframe$gdist)
   (SSTotal - SSGroup)/SSTotal
