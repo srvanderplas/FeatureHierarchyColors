@@ -55,7 +55,7 @@ pick.clusters <- function(mix.data, K, N){
       centers <- apply(mix.data[,c("x", "y")], 2, function(x) quantile(x, seq(0, 1, length.out=2*K+1)[(1:K)*2]))
     }
 
-    clusters <- try(kmeans(mix.data[,c("x", "y")], centers=centers))
+    clusters <- try(kmeans(mix.data[,c("x", "y")], centers=centers, algorithm = "Lloyd"))
     # if kmeans doesn't fail, then test for cluster size equality
     if(mode(clusters)!="character"){
       if(sum(clusters$size>(N/(K*2+1)))==K & sum(clusters$size>=4)==K){
@@ -64,7 +64,7 @@ pick.clusters <- function(mix.data, K, N){
     } else {
       centers <- mix.data[sample(1:nrow(mix.data), K, replace=FALSE),c("x", "y")]
     }
-    if(iter>50000){
+    if(iter>5000){
       warning("Max kmeans iterations")
       break;
     }

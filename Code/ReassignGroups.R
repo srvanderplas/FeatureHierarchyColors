@@ -20,7 +20,7 @@ extract.data.pars <- function(filename){
   )
 }
 
-set.seed(32509813)
+set.seed(32309813)
 data <- filelist %>%
   rowwise() %>%
   do({
@@ -34,6 +34,12 @@ data <- filelist %>%
     df$oldgroup <- tmp
     df
   })
+
+# data %>% group_by(set, .sample) %>%
+#   summarize(minpts = min(table(group)), maxpts = max(table(group))) %>%
+#   subset(minpts<4)
+
+
 
 save(data, file = "Images/DataWithNewGroups.RData")
 
