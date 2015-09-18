@@ -222,20 +222,20 @@ eval.data.quantiles <- function(i, data.set.parms, reps=3){
         data.frame(.sample=unique(.$.sample),
                    LineSig = summary(reg)$r.squared,
                    ClusterSig = cluster(.),
-                   lineplot=unique(.$target1),
-                   groupplot=unique(.$target2))
+                   target1=unique(.$target1),
+                   target2=unique(.$target2))
       })
     data.sub.stats <- data.frame(
       data.set.parms[,c("K", "sd.trend", "sd.cluster", "N")],
       summarize(
         data.sub.subplot.stats,
         set=unique(set),
-        line=LineSig[.sample==lineplot],
-        cluster=ClusterSig[.sample==groupplot],
-        null.line = max(LineSig[.sample!=lineplot & .sample!=groupplot]),
-        null.cluster=max(ClusterSig[.sample!=groupplot & .sample!=lineplot]),
-        lineplot = unique(lineplot),
-        groupplot = unique(groupplot)))
+        line=LineSig[.sample==target1],
+        cluster=ClusterSig[.sample==target2],
+        null.line = max(LineSig[.sample!=target1 & .sample!=target2]),
+        null.cluster=max(ClusterSig[.sample!=target2 & .sample!=target1]),
+        target1 = unique(target1),
+        target2 = unique(target2)))
 
     # Calculate quantiles of datasets compared to simulated quantiles
     tmp <- data.frame(
@@ -416,9 +416,9 @@ save.pics <- function(df, datastats, plotparms, plotname, palname = NULL, colorp
   l3 <- which(plotname==c("plain","color", "shape", "colorShape", "colorEllipse", "colorShapeEllipse", "trend", "trendError", "colorTrend", "colorEllipseTrendError"))-1
   difficulty <- as.numeric(sprintf('%d%d%d', datastats$l1, datastats$l2, l3))
 
-  pValue <- ifelse(sum(c("lineplot", "groupplot")%in%names(datastats))==2, sprintf("line-%.5f-cluster-%.5f", datastats$line, datastats$cluster),
+  pValue <- ifelse(sum(c("target1", "target2")%in%names(datastats))==2, sprintf("line-%.5f-cluster-%.5f", datastats$line, datastats$cluster),
                    sprintf("%s-%.5f", datastats$type, datastats$target.sig))
-  picName <- ifelse(sum(c("lineplot", "groupplot")%in%names(datastats))==2,
+  picName <- ifelse(sum(c("target1", "target2")%in%names(datastats))==2,
                     paste0("Images/Lineups/svgs/", fname, ".svg"),
                     paste0("Images/Lineups/trials/", fname, ".svg"))
 
