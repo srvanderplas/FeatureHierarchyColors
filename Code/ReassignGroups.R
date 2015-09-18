@@ -29,17 +29,17 @@ data <- filelist %>%
   }) %>% ungroup() %>%
   group_by(set, .sample) %>%
   do({
-    tmp <- .$group
-    df <- pick.clusters(., unique(.$k), nrow(.))
-    df$oldgroup <- tmp
+    # Only reassign groups to samples which are not the cluster target sample
+    if (unique(.$.sample) == unique(.$target2)) {
+      df <- .
+      df$oldgroup <- df$group
+    } else {
+      tmp <- .$group
+      df <- pick.clusters(., unique(.$k), nrow(.))
+      df$oldgroup <- tmp
+    }
     df
   })
-
-# data %>% group_by(set, .sample) %>%
-#   summarize(minpts = min(table(group)), maxpts = max(table(group))) %>%
-#   subset(minpts<4)
-
-
 
 save(data, file = "Images/DataWithNewGroups.RData")
 
@@ -86,7 +86,13 @@ source("./Code/theme_lineup.R")
 
 plot.names <- c("color", "colorEllipse", "colorTrend", "colorEllipseTrendError")
 
-plot.opts <- data.frame(expand.grid(i=unique(data$set), j=plot.names, k = unique(color.matrix$type)))
+plot.opts <- data.frame(
+  expand.grid(
+    i = unique(data$set),
+    j = plot.names,
+    k = unique(color.matrix$type)
+  )
+)
 
 data.stats <- data[,c(1:4, 9:10)] %>% unique() %>%
   mutate(K = k, sd.trend = sdline, sd.cluster = sdgroup) %>% select(-k, -sdline, -sdgroup)
