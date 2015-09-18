@@ -110,14 +110,36 @@ plot.parms <- expand.grid(
   30 # color + ellipse + trend + error
 ),]
 
-picture.details <- plot.opts %>% rowwise() %>% do({
+# init_cluster(cores=14, quiet = F)
+#
+# picture.details <- plot.opts %>% rowwise() %>% do({
+#   i <- .$i
+#   j <- .$j
+#   k <- .$k
+#   save.pics(subset(data, set == i), datastats = data.stats[i,],
+#             plotparms = plot.parms[j,], plotname = j, palname = k,
+#             colorp = subset(color.matrix, N == data.stats$K[i] & type == k)$color)
+# })
+
+library(multicore)
+
+make.files <- function(z){
+  . <- plot.opts[z,]
   i <- .$i
   j <- .$j
   k <- .$k
-  save.pics(subset(data, set == i), datastats = data.stats[i,],
-            plotparms = plot.parms[j,], plotname = j, palname = k,
-            colorp = subset(color.matrix, N == data.stats$K[i] & type == k)$color)
-})
+  tmp <- save.pics(subset(data, set == i), datastats = data.stats[i,],
+                   plotparms = plot.parms[j,], plotname = j, palname = k,
+                   colorp = subset(color.matrix, N == data.stats$K[i] & type == k)$color)
+  message(paste0(tmp$filename, " completed"))
+  gc(verbose = F, reset = F)
+  return(tmp)
+}
+
+
+res <- mclapply(1:nrow(plot.opts), make.files, mc.preschedule = F, mc.cores = 14, mc.cleanup = TRUE)
+
+picture.details <- bind_rows(res)
 
 write.csv(picture.details[,-c(1:2)], "./Images/Lineups/picture-details.csv", row.names=FALSE)
 
