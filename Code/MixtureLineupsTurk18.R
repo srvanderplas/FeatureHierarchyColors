@@ -437,12 +437,12 @@ save.pics <- function(df, datastats, plotparms, plotname, palname = NULL, colorp
   )
 }
 
-interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6, height=6, trial=FALSE, ex=FALSE) {
+interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6.4, height=6.4, trial=FALSE, ex=FALSE) {
   path <- ifelse(ex, "Images/Lineups/example/", "Images/Lineups/")
   if(ex){
-    ggsave(plotobj, filename=paste0(path, "pngs/", fname, ".png"), width=width, height=height, dpi=100)
+    ggsave(plotobj, filename=paste0(path, "pngs/", fname, ".png"), width=width, height=height, units = "in", dpi = 100)
   }
-  ggsave(plotobj, filename=paste0(path, "pdfs/", fname, ".pdf"), width=width, height=height, dpi=100)
+  ggsave(plotobj, filename=paste0(path, "pdfs/", fname, ".pdf"), width=width, height=height, units = "in", dpi = 100)
   CairoPDF(file=tempfile(), width=width, height=height)
   print(plotobj)
   require(gridSVG)
@@ -459,7 +459,7 @@ interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6,
   # use script on server to get locally executable javascript code
   # or use inline option
   grid.script(filename=script)
-  grid.export(name=paste0(path, ifelse(trial, "trials/", "svgs/"), fname, ".svg"), uniqueNames=FALSE, exportJS="inline", exportCoords="inline", exportMappings="inline")
+  grid.export(name=paste0(path, ifelse(trial, "trials/", "svgs/"), fname, ".svg"), uniqueNames=FALSE, exportJS="inline", exportCoords="inline", exportMappings="inline", res = 100)
   dev.off()
 }
 

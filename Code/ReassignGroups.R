@@ -94,6 +94,8 @@ plot.opts <- data.frame(
   )
 )
 
+plot.opts$idx <- 1:nrow(plot.opts)
+
 data.stats <- data[,c(1:4, 9:10)] %>% unique() %>%
   mutate(K = k, sd.trend = sdline, sd.cluster = sdgroup) %>% select(-k, -sdline, -sdgroup)
 
@@ -115,6 +117,18 @@ plot.parms <- expand.grid(
   6, # color + trend
   30 # color + ellipse + trend + error
 ),]
+
+# Merge to determine which stuff to keep...
+plot.opts <- merge(plot.opts, data.stats, by.x = c("i"), by.y = c("set")) %>% arrange(idx)
+
+# subset plot.opts according to criteria for experiment design...
+plot.opts <- subset(
+  plot.opts,
+  (str_detect(k, "turk16")) |
+    (K == 3 & sd.trend %in% c(0.35, 0.45) & sd.cluster %in% c(0.30, 0.35)) |
+    (K == 5 & sd.trend %in% c(0.35, 0.45) & sd.cluster %in% c(0.25, 0.30))
+)
+
 
 # init_cluster(cores=14, quiet = F)
 #
@@ -146,8 +160,37 @@ make.files <- function(z){
 res <- mclapply(1:nrow(plot.opts), make.files, mc.preschedule = F, mc.cores = 14, mc.cleanup = TRUE)
 
 picture.details <- bind_rows(res)
+picture.details$test_param <- paste0(
+  str_replace(picture.details$test_param, "turk16", "turk18"),
+  "-", picture.details$palname
+)
 
-write.csv(picture.details[,-c(1:2)], "./Images/Lineups/picture-details.csv", row.names=FALSE)
+picture.details2 <- select(picture.details, -palname)
+# picture.details2 <- subset(
+#   picture.details,
+#   (str_detect(test_param, "turk16")) |
+#     (str_detect(param_value, "k-3") &
+#        str_detect(param_value, "sdline-0\\.[34]5") &
+#        str_detect(param_value, "sdgroup-0\\.3[05]")) |
+#     (str_detect(param_value, "k-5") &
+#        str_detect(param_value, "sdline-0\\.[34]5") &
+#        str_detect(param_value, "sdgroup-(0\\.25|0\\.30)"))
+#   )
+
+picture.details2$i <- str_extract(picture.details2$data_name, "set-\\d{1,2}") %>% str_replace("set-", "") %>% as.numeric
+picture.details2$j <- (str_replace(picture.details2$test_param, "turk18-(\\w*)-(.*)", "\\1") %>% factor() %>% as.numeric()) - 1
+picture.details2$k <- (str_replace(picture.details2$test_param, "turk18-(.*)-(\\w*)", "\\2") %>% factor() %>% as.numeric()) - 1
+picture.details2$sample_size <- str_replace(picture.details2$param_value, "k-(\\d)-(.*)", "\\1") %>% as.numeric
+picture.details2$pic_id <- with(picture.details2, sprintf("%d%d%d", i, j, k)) %>% as.numeric()
+picture.details2$p_value <- ""
+picture.details2$difficulty <- picture.details2$i
+
+picture.details3 <- select(picture.details2, pic_id, sample_size, test_param, param_value, p_value, obs_plot_location, pic_name, experiment, difficulty, data_name)
+
+write.csv(picture.details, "./Images/Lineups/picture-details-incomplete.csv", row.names = FALSE)
+write.csv(picture.details3, "./Images/Lineups/picture-details.csv", row.names=FALSE)
+
+picture.details <- read.csv("./Images/Lineups/picture-details.csv", stringsAsFactors = F)
 
 files <- paste0("Images/Lineups/svgs/", list.files("./Images/Lineups/svgs"))
 del.files <- !(files%in%picture.details$pic_name)
