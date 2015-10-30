@@ -20,29 +20,29 @@ extract.data.pars <- function(filename){
   )
 }
 
-set.seed(32309813)
-data <- filelist %>%
-  rowwise() %>%
-  do({
-    pars <- extract.data.pars(.$filename)
-    data.frame(pars, read.csv(file = .$filename, stringsAsFactors = FALSE), stringsAsFactors = FALSE)
-  }) %>% ungroup() %>%
-  group_by(set, .sample) %>%
-  do({
-    # Only reassign groups to samples which are not the cluster target sample
-    if (unique(.$.sample) == unique(.$target2)) {
-      df <- .
-      df$oldgroup <- df$group
-    } else {
-      tmp <- .$group
-      df <- pick.clusters(., unique(.$k), nrow(.))
-      df$oldgroup <- tmp
-    }
-    df
-  })
-
-save(data, file = "Images/DataWithNewGroups.RData")
-
+# set.seed(32309813)
+# data <- filelist %>%
+#   rowwise() %>%
+#   do({
+#     pars <- extract.data.pars(.$filename)
+#     data.frame(pars, read.csv(file = .$filename, stringsAsFactors = FALSE), stringsAsFactors = FALSE)
+#   }) %>% ungroup() %>%
+#   group_by(set, .sample) %>%
+#   do({
+#     # Only reassign groups to samples which are not the cluster target sample
+#     if (unique(.$.sample) == unique(.$target2)) {
+#       df <- .
+#       df$oldgroup <- df$group
+#     } else {
+#       tmp <- .$group
+#       df <- pick.clusters(., unique(.$k), nrow(.))
+#       df$oldgroup <- tmp
+#     }
+#     df
+#   })
+#
+# save(data, file = "Images/DataWithNewGroups.RData")
+load("Images/DataWithNewGroups.RData")
 source("Code/Turk16Palette.R")
 library(RColorBrewer)
 library(dichromat)

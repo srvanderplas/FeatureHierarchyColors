@@ -58,13 +58,13 @@ pick.clusters <- function(mix.data, K, N){
     clusters <- try(kmeans(mix.data[,c("x", "y")], centers=centers, algorithm = "Lloyd"))
     # if kmeans doesn't fail, then test for cluster size equality
     if(mode(clusters)!="character"){
-      if(sum(clusters$size>(N/(K*2+1)))==K & sum(clusters$size>=4)==K){
+      if(sum(clusters$size>max(c(4, (N/(K*2+1)))))==K & length(unique(clusters$cluster))==K){
         break;
       }
     } else {
       centers <- mix.data[sample(1:nrow(mix.data), K, replace=FALSE),c("x", "y")]
     }
-    if(iter>5000){
+    if(iter > 15000){
       warning("Max kmeans iterations")
       break;
     }
@@ -393,6 +393,7 @@ save.pics <- function(df, datastats, plotparms, plotname, palname = NULL, colorp
     plotobj <- gen.plot(df, aes=get.aes(plotparms), stats=get.stats(plotparms), colorp = colorp, shapep = shapep)
   }
 
+  plotobj <- plotobj + theme(aspect.ratio = 1)
 
   if(plotname=="color" | testplot) {
     write.csv(df, file = paste0("Images/Lineups/Data/", dataname, ".csv"), row.names=FALSE)
@@ -437,12 +438,13 @@ save.pics <- function(df, datastats, plotparms, plotname, palname = NULL, colorp
   )
 }
 
-interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6.4, height=6.4, trial=FALSE, ex=FALSE) {
+interactive_lineup <- function(plotobj, fname, script, toggle="toggle", width=6.0, height=6.05, trial=FALSE, ex=FALSE) {
   path <- ifelse(ex, "Images/Lineups/example/", "Images/Lineups/")
   if(ex){
     ggsave(plotobj, filename=paste0(path, "pngs/", fname, ".png"), width=width, height=height, units = "in", dpi = 100)
   }
   ggsave(plotobj, filename=paste0(path, "pdfs/", fname, ".pdf"), width=width, height=height, units = "in", dpi = 100)
+  ggsave(plotobj, filename=paste0(path, "pngs/", fname, ".png"), width=width, height=height, units = "in", dpi = 100)
   CairoPDF(file=tempfile(), width=width, height=height)
   print(plotobj)
   require(gridSVG)
