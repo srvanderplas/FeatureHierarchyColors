@@ -52,7 +52,7 @@ userdata2 <- left_join(userdata, select(answers, pic_id, sample_size, test_param
          cluster_id = cluster.target == response_no,
          k = str_sub(param_value, 3, 3) %>% as.numeric(),
          sd.trend = str_sub(param_value, 12, 15) %>% as.numeric(),
-         sd.cluster = str_sub(param_value, -4, -1) %>% as.)
+         sd.cluster = str_sub(param_value, -4, -1) %>% as.numeric())
 
 plot.summary <- userdata2 %>% group_by(plot, aes, palette, pic_id, k, sd.trend, sd.cluster) %>%
   summarize(pct.trend = mean(trend_id),
@@ -69,3 +69,11 @@ ggplot(data = plot.summary) +
 ggplot(data = plot.summary) +
   geom_boxplot(aes(x = aes, y = Prop.Correct, color = Type)) +
   facet_grid(k ~ palette) + coord_flip()
+
+ggplot(data = plot.summary) +
+  geom_boxplot(aes(x = palette, y = Prop.Correct, color = Type)) +
+  facet_grid(k + Type ~ aes) + coord_flip()
+
+library(lme4)
+trend <- glmer(trend_id ~ palette + aes + sample_size + (1|pic_id) + (1|nick_name), family = binomial(), data=userdata2)
+cluster <- glmer(cluster_id ~ palette + aes + sample_size + (1|pic_id) + (1|nick_name), family = binomial(), data=userdata2)
