@@ -75,5 +75,8 @@ ggplot(data = plot.summary) +
   facet_grid(k + Type ~ aes) + coord_flip()
 
 library(lme4)
-trend <- glmer(trend_id ~ palette + aes + sample_size + (1|pic_id) + (1|nick_name), family = binomial(), data=userdata2)
+turk19 <- subset(userdata2, plot %in% c(25:36, 43:54))
+
+# models are not converging ...
+trend <- glmer(trend_id ~ palette*pic_id  + (1|nick_name), family = binomial(), data=turk19)
 cluster <- glmer(cluster_id ~ palette + aes + sample_size + (1|pic_id) + (1|nick_name), family = binomial(), data=userdata2)
